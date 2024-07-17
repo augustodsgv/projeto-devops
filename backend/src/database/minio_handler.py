@@ -1,4 +1,4 @@
-from database_handler import Database_handler
+from src.database.database_handler import Database_handler
 from minio import Minio
 import os
 
@@ -26,10 +26,11 @@ class Minio_handler(Database_handler):
         
         # Checking existence of the file
         if not os.path.exists(file_path):
-            raise FileNotFoundError(f'No such file {file_path}')
+            raise FileNotFoundError(f'No such file \"{file_path}\"')
         
-        if object_name != None:
+        if object_name == None:
             object_name = file_path.split('/')[-1]      # If no object name was provided, using the file name
+
         self.client.fput_object(bucket_name, file_path=file_path, object_name=object_name)
 
     def get(self, bucket_name : str, object_name : str, download_path : str):

@@ -4,16 +4,96 @@ from src.reencoder.av1_reencoder import Av1_reencoder
 from src.reencoder.vp8_reencoder import Vp8_reencoder
 from src.reencoder.vp9_reencoder import Vp9_reencoder
 from src.reencoder.video_reencoder import Video_reencoder
+from src.utils.video_cutter import Video_cutter
+from src.database.minio_handler import Minio_handler
+
 import os
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
+from typing import Optional
 import uvicorn
 
 app = FastAPI()
 output_mount_path = ''
 
+class download_request(BaseModel):
+    video_name : str
+
+class cut_request(BaseModel):
+    video_path : str
+    video_begin : int
+    video_end : int
+    new_name : Optional[str] = None
+
 class reencode_request(BaseModel):
     video_source : str
+
+@app.post('/cut')
+def cut_video(request : cut_request):
+    cutter = Video_cutter()
+    video_path = request.video_path
+    video_begin = request.video_begin
+    video_end = request.video_end
+    new_name = request.new_name
+    
+    # Setting the new video object name
+    if new_name == None:
+        video_name = video_path.split('/')[-1]
+    else:
+        video_name = new_name
+    try:
+        cutter.cut(video_path=video_path, video_begin=video_begin, video_end=video_end, output_path=video_name)
+        database = Minio_handler("database:9000", "root", "rootroot")
+        database.insert("bucket-teste1", video_name)
+        return {'Video cortado com sucesso!'}
+    except Exception as e:
+        return {'Erro ao cortar o vídeo:':f'{str(e)}'}
+    finally:
+        if os.path.exists(video_name):      # Limpando arquivos temporários
+            os.remove(video_name)
+
+@app.get('/download')
+def download_video(request : download_request):
+    database : Minio_handler = Minio_handler("database:9000", "root", "rootroot")
+    file_name = './'+request.video_name
+    try:
+        database.get("bucket-teste1", request.video_name, file_name)
+        def iterfile():
+            with open(file_name, 'rb') as file:
+                yield from file
+        return StreamingResponse(iterfile(), media_type="video/mp4")
+    except Exception as e:
+        return {'Erro ao fazer download do vídeo o vídeo:':f'{str(e)}'}
+    # TODO: fix this. The finally block does now awaits for the yields functions to run
+    # finally:
+    #     if os.path.exists(file_name):
+    #         os.remove(file_name)
+
+
+@app.post('/cut_file')
+def cut_video(request : cut_request):
+    cutter = Video_cutter()
+    video_path = request.video_path
+    video_begin = request.video_begin
+    video_end = request.video_end
+    new_name = request.new_name
+    
+    # Setting the new video object name
+    if new_name == None:
+        video_name = video_path.split('/')[-1]
+    else:
+        video_name = new_name
+    try:
+        cutter.cut(video_path=video_path, video_begin=video_begin, video_end=video_end, output_path=video_name)
+        database = Minio_handler("database:9000", "root", "rootroot")
+        database.insert("bucket-teste1", video_name)
+        return {'Video cortado com sucesso!'}
+    except Exception as e:
+        return {'Erro ao cortar o vídeo:':f'{str(e)}'}
+    finally:
+        if os.path.exists(video_name):      # Limpando arquivos temporários
+            os.remove(video_name)
 
 @app.post('/reencode')
 def reencode_video(request : reencode_request):
@@ -62,4 +142,4 @@ if __name__ == '__main__':
     if 'REENCODE_CODEC' not in os.environ:
         raise Exception('No reencode codec provided!')
     
-    uvicorn.run(app, host='0.0.0.0', port=8080)
+    uvicorn.run(app, host='0.0.0.0', port=7000)
