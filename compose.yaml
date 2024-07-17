@@ -1,0 +1,16 @@
+services:
+  frontend:
+    build: ./frontend
+    ports:
+    - "8080:80"
+    environment:
+    - BACKEND_URL=localhost
+    - BACKEND_PORT=7000
+    depends_on:
+    - backend
+  
+  backend:
+    build: ./backend_mock
+    ports:
+    - "7000:7000"
+    
