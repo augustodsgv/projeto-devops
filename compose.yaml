@@ -10,7 +10,23 @@ services:
     - backend
   
   backend:
-    build: ./backend_mock
+    build: ./backend
+    environment:
+      - OUTPUT_MOUNT_PATH=/data
+      - REENCODE_CODEC=VP9
     ports:
     - "7000:7000"
+    volumes:
+    - ./backend/data:/data
     
+  database:
+    image: quay.io/minio/minio
+    environment:
+    - MINIO_ROOT_USER=root
+    - MINIO_ROOT_PASSWORD=rootroot
+    ports:
+    - "9000:9000"
+    - "9001:9001"
+    volumes:
+    - ./db/data:/data
+    command: server /data --console-address ":9001"
