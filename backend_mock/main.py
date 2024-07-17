@@ -9,7 +9,7 @@ app.add_middleware(
     allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"]
+    allow_headers=["*"],
 )
 
 class reencode_request(BaseModel):
@@ -17,4 +17,5 @@ class reencode_request(BaseModel):
 
 @app.post('/reencode')
 def reencode(request : reencode_request):
-    return {f'Reencoding video from {request.video_source}.'}
+    print(request.model_dump_json())
+    return {f'Your video from {request} was recievied and will be reencoded soon'}
