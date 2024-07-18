@@ -1,6 +1,6 @@
 import { env } from './env.js'
-const backend_url = env.BACKEND_URL
-const backend_port = env.BACKEND_PORT
+const BACKEND_URL = env.BACKEND_URL
+const BACKEND_PORT = env.BACKEND_PORT
 
 
 async function loadTableData() {
@@ -87,7 +87,7 @@ async function loadTableData() {
 }
 
 async function fetch_video_list(){
-    const response = await fetch("http://localhost:7000/list", {
+    const response = await fetch(BACKEND_URL+':'+BACKEND_PORT+"/list", {
         method: 'GET',
     });
     return response
@@ -102,7 +102,7 @@ fileInput.addEventListener('change', () => {
     const selectedFile = fileInput.files[0];
     const formData = new FormData();
     formData.append('file', selectedFile);
-    fetch('http://localhost:7000/upload',{
+    fetch(BACKEND_URL+':'+BACKEND_PORT+'/upload',{
         method: 'POST',
         body: formData
     })
@@ -152,7 +152,7 @@ async function display_upload_response(response){
 //     // display_download_response(response);
 // });
 async function download_video(video_name){
-    const response = await fetch('http://localhost:7000/download', {
+    const response = await fetch(BACKEND_URL+':'+BACKEND_PORT+'/download', {
         method: 'post',
         headers: {
             'Content-Type': 'application/json'
