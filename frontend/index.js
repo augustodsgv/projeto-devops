@@ -25,7 +25,6 @@ async function loadTableData() {
         const editButton = document.createElement('button');
         editButton.textContent = 'Edit';
         editButton.onclick = () => {
-            // Redirect to edit page (implement your logic here)
             window.location.href = `/edit.html?name=${video}`;
         };
         editCell.appendChild(editButton);
@@ -35,21 +34,11 @@ async function loadTableData() {
         const deleteCell = document.createElement('td');
         const deleteButton = document.createElement('button');
         deleteButton.textContent = 'Delete';
-        deleteButton.onclick = () => {
-            // Call API to delete video (implement your logic here)
-            fetch(`/api/delete/${video.id}`, { method: 'DELETE' })
-                .then(response => {
-                    if (response.ok) {
-                        // Remove video from the array and reload table data
-                        const index = videos.findIndex(v => v.name === video);
-                        if (index !== -1) {
-                            videos.splice(index, 1);
-                            loadTableData();
-                        }
-                    } else {
-                        alert('Failed to delete video');
-                    }
-                });
+        deleteButton.onclick = async () => {
+            response = await delete_video(video);
+            if (response.ok){
+                // TODO: exibir mensagem de êxito
+            }
         };
         deleteCell.appendChild(deleteButton);
         row.appendChild(deleteCell);
@@ -72,7 +61,6 @@ async function loadTableData() {
                     document.body.appendChild(a);
                     a.click();
                     window.URL.revokeObjectURL(url);
-                
                 }else{
                     throw new Error(`Error: ${response.text()}`);
                 }
@@ -110,6 +98,7 @@ fileInput.addEventListener('change', () => {
         display_upload_response(response);
         console.log('Selected file:', selectedFile.name);
     });
+    
 })
 
 async function display_upload_response(response){
@@ -124,33 +113,6 @@ async function display_upload_response(response){
     }
 }
 
-// // Botão de download
-// const download_button = document.getElementById('download_button');
-// download_button.addEventListener('click', async (event) => {
-//     event.preventDefault();
-//     let response;
-//     try {
-//         response = await download_video();
-//         if (response.ok){
-//             const blob = await response.blob();
-//             const url = window.URL.createObjectURL(blob);
-//             const a = document.createElement('a');
-//             a.style.display = 'none';
-//             a.href = url;
-//             a.download = `${document.getElementById('video_to_download').value}`;
-//             document.body.appendChild(a);
-//             a.click();
-//             window.URL.revokeObjectURL(url);
-        
-//         }else{
-//             throw new Error(`Error: ${response.text()}`);
-//         }
-//     } catch (err) {
-//         console.error(`error: ${err}`);
-//     }
-//     // console.log("passou aqui");
-//     // display_download_response(response);
-// });
 async function download_video(video_name){
     const response = await fetch(BACKEND_URL+':'+BACKEND_PORT+'/download', {
         method: 'post',
@@ -161,5 +123,13 @@ async function download_video(video_name){
             video_name:video_name
         })
     });
-    return response
+    return response;
+}
+
+async function delete_video(video_name){
+    const response = await fetch(
+        BACKEND_URL+':'+BACKEND_PORT+'/delete_video?video_name='+video_name, {
+        method: 'delete',
+    });
+    return response;
 }

@@ -138,13 +138,15 @@ def cut_video(request : Cut_request):
             os.remove(video_name)
 
 @app.delete('/delete_video')
-def delete_video(request : Delete_request):
-    database = Minio_handler(DATABASE_ENDPOINT, DATABASE_USR, DATABASE_PASSWD)
-    # try:
-    database.remove(DATABASE_BUCKET_NAME, request.video_name)
-    # except Exception as e:
-    #     raise HTTPException(status_code=500, detail=f'Erro ao deletar o vídeo:{str(e)}')
-    
+def delete_video(video_name : str = None):
+    if video_name == None:
+        raise HTTPException(status_code=422, detail=f'Missing video_name parameter')
+    database = Minio_handler(f'{DATABASE_ENDPOINT}:{DATABASE_PORT}', DATABASE_USR, DATABASE_PASSWD)
+    try:
+        database.remove(DATABASE_BUCKET_NAME, video_name)
+        return {'Seu vídeo foi removido'}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f'Erro ao deletar o vídeo:{str(e)}')
 
 
 

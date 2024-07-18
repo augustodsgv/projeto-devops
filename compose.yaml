@@ -16,14 +16,18 @@ services:
       - REENCODE_CODEC=VP9
       - DATABASE_ENDPOINT=database
       - DATABASE_PORT=9000
-      - DATABASE_USR=root
-      - DATABASE_PASSWD=rootroot
+      # - DATABASE_USR=root
+      # - DATABASE_PASSWD=rootroot
       # - DATABASE_BUCKET_NAME=bucket_ffmpeg
       - DATABASE_BUCKET_NAME=bucket-teste1
+    env_file:       # Getting database user and passwd
+      - database_credentials.env
     ports:
     - "7000:7000"
     volumes:
     - ./backend/data:/data
+    depends_on:
+      - database
     
   database:
     image: quay.io/minio/minio
