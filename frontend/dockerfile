@@ -8,4 +8,7 @@ RUN chmod +x /docker-entrypoint.d/40-environment-setup.sh
 COPY index.html /usr/share/nginx/html/index.html
 COPY index.js /usr/share/nginx/html/index.js
 
+COPY edit.html /usr/share/nginx/html/edit.html
+COPY edit.js /usr/share/nginx/html/edit.js
+
 EXPOSE 80

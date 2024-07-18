@@ -13,10 +13,15 @@ class Video_cutter:
         cut_call = f"ffmpeg -i {video_path} -ss {video_begin}"
 
         if video_end != None:               # If no video_end is provided, cuts to the end
-             cut_call += f" -to {video_end}"
+            cut_call += f" -to {video_end}"
 
-        cut_call +=f" -crf 0 {output_path}"
-        call = cut_call.split()
-        print(call)
-        subprocess.run(call)
-        subprocess.run("ls")
+        cut_call +=f" -crf 0 -y {output_path}"
+        cut_call = cut_call.split()
+        ffmpeg_process = subprocess.Popen(cut_call, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = ffmpeg_process.communicate()
+        if ffmpeg_process.returncode != 0:
+            raise Exception("Erro ao cortar o vídeo!\nstdout:\n\n"+stdout.decode('utf-8') + '\n\nstderr\n\n'+stderr.decode('utf-8'))
+        
+            
+        print(cut_call)
+        

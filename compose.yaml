@@ -14,6 +14,12 @@ services:
     environment:
       - OUTPUT_MOUNT_PATH=/data
       - REENCODE_CODEC=VP9
+      - DATABASE_ENDPOINT=database
+      - DATABASE_PORT=9000
+      - DATABASE_USR=root
+      - DATABASE_PASSWD=rootroot
+      # - DATABASE_BUCKET_NAME=bucket_ffmpeg
+      - DATABASE_BUCKET_NAME=bucket-teste1
     ports:
     - "7000:7000"
     volumes:
@@ -21,11 +27,9 @@ services:
     
   database:
     image: quay.io/minio/minio
-    environment:
-    - MINIO_ROOT_USER=root
-    - MINIO_ROOT_PASSWORD=rootroot
+    env_file:
+      - database_credentials.env
     ports:
-    - "9000:9000"
     - "9001:9001"
     volumes:
     - ./db/data:/data

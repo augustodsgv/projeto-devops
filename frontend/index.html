@@ -4,39 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FFMpeg Online</title>
+    <style>
+        table {
+            width: 80%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 5px;
+            text-align: left;
+        }
+        button {
+            padding: 5px;
+            margin: 5px;
+        }
+    </style>
 </head>
 <body>
     <h1>FFMpeg Online</h1>
-    <h2>Arquivos disponívels</h2>
-    <table id="file-table" border="1">
+    <hr></hr>
+    <table id="videoTable">
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>URL</th>
+                <th>File Name</th>
+                <th>Edit</th>
+                <th>Delete</th>
+                <th>Download</th>
             </tr>
         </thead>
         <tbody>
-            <!-- Rows will be added here dynamically -->
+            <!-- Rows will be added dynamically here -->
         </tbody>
     </table>
-    
-    <div>
-        <p>Selecione um vídeo</p>
-        <input type="file" id="file-input">
-        <p id="upload_msg"></p>
-    </div>
-    <p></p>
-    <!-- <div class="btn"x>
-        <input type="text" id="video_url" name="Video url" placeholder="URL do video">
-        <button type="button" id="reencode_button">Reencode video</button>
-        <p id="reencode_msg"></p>
-    </div> -->
-    <div>
-        <input type="text" id="video_to_download" name="video_to_download" placeholder="Nome do vídeo para baixar">
-        <button type="button" id="download_button">Baixar vídeo</button>
-        <p id="download_msg"></p>
-    </div>
+
+    <p>Upload de vídeo</p>
+    <input type="file" id="file-input"/>
+    <p id="upload_msg"></p>
 
     <script src="index.js" type="module"></script>
 </body>

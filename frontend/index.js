@@ -1,119 +1,104 @@
-// Global assignments
-// const reencode_url = 'http://localhost:7000/reencode'
-// // Getting environmnet variables 
-//     // window = window = await import('./env-config.js');
-//     // backend_url = window.env.BACKEND_URL;
-//     // backend_port = window.env.BACKEND_PORT;
-//     // console.error('error: nanana');
-
-// // Reencode buttom
-// const reencode_button = document.getElementById('reencode_button');
-// reencode_button.addEventListener('click', async (event) => {
-//     event.preventDefault();
-//     try {
-//         const response = await reencode_call();
-//         display_reencode_response(response)
-//     } catch (err) {
-//         console.error(`error: ${err}`);
-//     }
-// });
-
-// async function reencode_call(){
-//     const video_url = document.getElementById('video_url').value;
-//     const response = await fetch(reencode_url, {
-//         method: 'post',
-//         headers: {
-//             'Content-Type': 'application/json'
-//         },
-//         body: JSON.stringify({
-//             video_source:video_url
-//         })
-//     });
-//     console.log(`post to ${video_url} with method ${response.method} and body ${response.body}`);
-//     if (response.ok){
-//         return response
-//     }else{
-//         throw new Error(`Error: ${response.text()}`);
-//     }
-// }
-
-// function display_reencode_response(response){
-//     // Getting return message displayed to the user
-//     let response_message = document.getElementById('reencode_msg');
-//     if (response.ok){
-//         response_message.textContent = 'Sua requisição foi recebida e seu vídeo será reencodado!';
-//         response_message.style.color = 'green';
-//     }
-//     // switch (await response.status()) {
-//     //     case 200:
-            
-//     //         break;
-    
-//     //     default:
-//     //         break;
-//     // }
-// }
+import { env } from './env.js'
+const backend_url = env.BACKEND_URL
+const backend_port = env.BACKEND_PORT
 
 
-// Download button
-const download_url = 'http://localhost:7000/download'
-const download_button = document.getElementById('download_button');
-download_button.addEventListener('click', async (event) => {
-    event.preventDefault();
-    let response;
-    try {
-        response = await download_video();
-        if (response.ok){
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = `${document.getElementById('video_to_download').value}.mp4`;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-        
-        }else{
-            throw new Error(`Error: ${response.text()}`);
-        }
-    } catch (err) {
-        console.error(`error: ${err}`);
+async function loadTableData() {
+    const tableBody = document.getElementById('videoTable').getElementsByTagName('tbody')[0];
+    tableBody.innerHTML = '';
+    const response = await fetch_video_list();
+    let videos
+    if (response.ok){
+        videos = await response.json()
+        console.log(videos)
     }
-    console.log("passou aqui");
-    display_download_response(response);
-});
-async function download_video(){
-    const video_name = document.getElementById('video_to_download').value;
-    const response = await fetch(download_url, {
-        method: 'post',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            video_name:video_name
+    videos.forEach(async video => {
+        const row = document.createElement('tr');
+
+        // File name column
+        const nameCell = document.createElement('td');
+        nameCell.textContent = video;
+        row.appendChild(nameCell);
+
+        // Edit button
+        const editCell = document.createElement('td');
+        const editButton = document.createElement('button');
+        editButton.textContent = 'Edit';
+        editButton.onclick = () => {
+            // Redirect to edit page (implement your logic here)
+            window.location.href = `/edit.html?name=${video}`;
+        };
+        editCell.appendChild(editButton);
+        row.appendChild(editCell);
+
+        // Delete button
+        const deleteCell = document.createElement('td');
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.onclick = () => {
+            // Call API to delete video (implement your logic here)
+            fetch(`/api/delete/${video.id}`, { method: 'DELETE' })
+                .then(response => {
+                    if (response.ok) {
+                        // Remove video from the array and reload table data
+                        const index = videos.findIndex(v => v.name === video);
+                        if (index !== -1) {
+                            videos.splice(index, 1);
+                            loadTableData();
+                        }
+                    } else {
+                        alert('Failed to delete video');
+                    }
+                });
+        };
+        deleteCell.appendChild(deleteButton);
+        row.appendChild(deleteCell);
+
+        // Download button
+        const downloadCell = document.createElement('td');
+        const downloadButton = document.createElement('button');
+        downloadButton.textContent = 'Download';
+        downloadButton.addEventListener('click', async () => {
+            let response;
+            try {
+                response = await download_video(video);
+                if (response.ok){
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = video;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                
+                }else{
+                    throw new Error(`Error: ${response.text()}`);
+                }
+            } catch (err) {
+                console.error(`error: ${err}`);
+            }
         })
+        downloadCell.appendChild(downloadButton);
+        row.appendChild(downloadCell);
+        tableBody.appendChild(row);
+    });
+}
+
+async function fetch_video_list(){
+    const response = await fetch("http://localhost:7000/list", {
+        method: 'GET',
     });
     return response
 }
 
-function display_download_response(response){
-    console.log(response.text())
-    // Getting return message displayed to the user
-    let response_message = document.getElementById('download_msg');
-    if (response.ok){
-        response_message.textContent = 'Iniciando download do arquivo!';
-        response_message.style.color = 'green';
-    }else{
-        response_message.textContent = 'Erro ao fazer o download!';
-        response_message.style.color = 'red';
-    }
-}
+// Load table data on page load
+window.onload = loadTableData;
 
 // const selectFileButton = document.getElementById('select-file-button');
 const fileInput = document.getElementById('file-input');
 fileInput.addEventListener('change', () => {
-    console.log("entrou aqui!");
     const selectedFile = fileInput.files[0];
     const formData = new FormData();
     formData.append('file', selectedFile);
@@ -139,33 +124,42 @@ async function display_upload_response(response){
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    fetch('http://localhost:7000/list')
-        .then(response => response.json(), {method: 'POST'})
-        .then(data => {
-            const tableBody = document.querySelector('#file-table tbody');
-            data.forEach(file => {
-                const row = document.createElement('tr');
-
-                const idCell = document.createElement('td');
-                idCell.textContent = file.id;
-                row.appendChild(idCell);
-
-                const nameCell = document.createElement('td');
-                nameCell.textContent = file.name;
-                row.appendChild(nameCell);
-
-                const urlCell = document.createElement('td');
-                const urlLink = document.createElement('a');
-                urlLink.href = file.url;
-                urlLink.textContent = file.url;
-                urlCell.appendChild(urlLink);
-                row.appendChild(urlCell);
-
-                tableBody.appendChild(row);
-            });
+// // Botão de download
+// const download_button = document.getElementById('download_button');
+// download_button.addEventListener('click', async (event) => {
+//     event.preventDefault();
+//     let response;
+//     try {
+//         response = await download_video();
+//         if (response.ok){
+//             const blob = await response.blob();
+//             const url = window.URL.createObjectURL(blob);
+//             const a = document.createElement('a');
+//             a.style.display = 'none';
+//             a.href = url;
+//             a.download = `${document.getElementById('video_to_download').value}`;
+//             document.body.appendChild(a);
+//             a.click();
+//             window.URL.revokeObjectURL(url);
+        
+//         }else{
+//             throw new Error(`Error: ${response.text()}`);
+//         }
+//     } catch (err) {
+//         console.error(`error: ${err}`);
+//     }
+//     // console.log("passou aqui");
+//     // display_download_response(response);
+// });
+async function download_video(video_name){
+    const response = await fetch('http://localhost:7000/download', {
+        method: 'post',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            video_name:video_name
         })
-        .catch(error => {
-            console.error('Error fetching files:', error);
-        });
-});
+    });
+    return response
+}

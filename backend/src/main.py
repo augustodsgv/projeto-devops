@@ -8,12 +8,21 @@ from src.utils.video_cutter import Video_cutter
 from src.database.minio_handler import Minio_handler
 
 import os
+import time
 from fastapi import FastAPI, HTTPException, Request, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional, Annotated
 import uvicorn
+
+# endpoints
+DATABASE_ENDPOINT = os.environ['DATABASE_ENDPOINT']
+DATABASE_PORT = os.environ['DATABASE_PORT']
+DATABASE_USR = os.environ['DATABASE_USR']
+DATABASE_PASSWD = os.environ['DATABASE_PASSWD']
+DATABASE_PASSWD = os.environ['DATABASE_PASSWD']
+DATABASE_BUCKET_NAME = os.environ['DATABASE_BUCKET_NAME']
 
 app = FastAPI()
 app.add_middleware(
@@ -29,54 +38,65 @@ class Download_request(BaseModel):
     video_name : str
 
 class Cut_request(BaseModel):
-    video_path : str
+    video_name : str
     video_begin : int
     video_end : int
-    new_name : Optional[str] = None
 
-class Reencode_request(BaseModel):
-    video_source : str
-@app.post('/list')
+class Delete_request(BaseModel):
+    video_name : str
+
+@app.get('/list')
 def list_videos():
-    database = Minio_handler("database:9000", "root", "rootroot")
-    return database.list("bucket-teste1")
+    database = Minio_handler(f"{DATABASE_ENDPOINT}:{DATABASE_PORT}", DATABASE_USR, DATABASE_PASSWD)
+    return database.list(DATABASE_BUCKET_NAME)
 
 @app.post('/cut')
-def cut_video(request : Cut_request):
+async def cut_video(request : Cut_request):
+    database = Minio_handler(f"{DATABASE_ENDPOINT}:{DATABASE_PORT}", DATABASE_USR, DATABASE_PASSWD)
     cutter = Video_cutter()
-    video_path = request.video_path
+    video_name = request.video_name
     video_begin = request.video_begin
     video_end = request.video_end
-    new_name = request.new_name
+    video_path = '/home/tmp/' + video_name
+    original_video_path = '/home/tmp/original_' + video_name
+    object_name = video_name
+    # Baixando o vídeo da database
+    database.get(DATABASE_BUCKET_NAME, video_name, original_video_path)
+
+    # try:
+    #     database.get(DATABASE_BUCKET_NAME, video_name)
+    # except:         # TODO: treat video not found
+    #     pass
     
-    # Setting the new video object name
-    if new_name == None:
-        video_name = video_path.split('/')[-1]
-    else:
-        video_name = new_name
-    try:
-        cutter.cut(video_path=video_path, video_begin=video_begin, video_end=video_end, output_path=video_name)
-        database = Minio_handler("database:9000", "root", "rootroot")
-        database.insert("bucket-teste1", video_name)
-        return {'Video cortado com sucesso!'}
-    except Exception as e:
-        return {'Erro ao cortar o vídeo:':f'{str(e)}'}
-    finally:
-        if os.path.exists(video_name):      # Limpando arquivos temporários
-            os.remove(video_name)
+    print('aqui')
+    # try:
+    
+    cutter.cut(video_path=original_video_path, video_begin=video_begin, video_end=video_end, output_path=video_path)
+    print('aqui tb')
+    database.insert(DATABASE_BUCKET_NAME, video_path, object_name=object_name)
+    print('ate aqui')
+    
+    return {'Video cortado com sucesso!'}
+    # except Exception as e:
+    #     return HTTPException(status_code=500, detail=f'Não foi possível cortar o vídeo: {str(e)}')
+        
+    # finally:
+    #     if os.path.exists(video_name):      # Limpando arquivos temporários
+    #         os.remove(video_name)
 
 @app.post('/download')
 def download_video(request : Download_request):
-    database : Minio_handler = Minio_handler("database:9000", "root", "rootroot")
+    database : Minio_handler = Minio_handler(f"{DATABASE_ENDPOINT}:{DATABASE_PORT}", DATABASE_USR, DATABASE_PASSWD)
     file_name = './'+request.video_name
+    
     try:
-        database.get("bucket-teste1", request.video_name, file_name)
+        database.get(DATABASE_BUCKET_NAME, request.video_name, file_name)
         def iterfile():
             with open(file_name, 'rb') as file:
                 yield from file
         return StreamingResponse(iterfile(), media_type="video/mp4")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f'Erro ao fazer download do vídeo o vídeo:{str(e)}')
+        raise HTTPException(status_code=500, detail=f'Erro ao fazer download do vídeo:{str(e)}')
     # TODO: fix this. The finally block does now awaits for the yields functions to run
     # finally:
     #     if os.path.exists(file_name):
@@ -84,11 +104,14 @@ def download_video(request : Download_request):
 
 @app.post('/upload')
 def upload_video(file : UploadFile = File(...)):
-    file_path = f"./{file.filename}"
+    if not os.path.exists("./tmp"):
+        os.mkdir("./tmp")
+    file_path = f"./tmp/{file.filename}"
     with open(file_path, "wb") as f:
         f.write(file.file.read())
+    database : Minio_handler = Minio_handler(f"{DATABASE_ENDPOINT}:{DATABASE_PORT}", DATABASE_USR, DATABASE_PASSWD)
+    database.insert(DATABASE_BUCKET_NAME, file_path, file.filename)
     return {"filename" : file.filename}
-
 
 @app.post('/cut_file')
 def cut_video(request : Cut_request):
@@ -105,8 +128,8 @@ def cut_video(request : Cut_request):
         video_name = new_name
     try:
         cutter.cut(video_path=video_path, video_begin=video_begin, video_end=video_end, output_path=video_name)
-        database = Minio_handler("database:9000", "root", "rootroot")
-        database.insert("bucket-teste1", video_name)
+        database = Minio_handler(f"{DATABASE_ENDPOINT}:{DATABASE_PORT}", DATABASE_USR, DATABASE_PASSWD)
+        database.insert(DATABASE_BUCKET_NAME, video_name)
         return {'Video cortado com sucesso!'}
     except Exception as e:
         return {'Erro ao cortar o vídeo:':f'{str(e)}'}
@@ -114,43 +137,18 @@ def cut_video(request : Cut_request):
         if os.path.exists(video_name):      # Limpando arquivos temporários
             os.remove(video_name)
 
-@app.post('/reencode')
-def reencode_video(request : Reencode_request):
-    reencoder = create_reencoder()
-    downloader = Bucket_downloader()
-    handler = Api_handler(reencoder=reencoder, downloader=downloader)
-    url = request.video_source
-    handler.accept_request(url, output_mount_path)
-    return {'Your video was recievied and will be reencoded soon'}
-
-def create_reencoder() -> Video_reencoder: 
-    if 'REENCODE_CODEC' in os.environ:
-       codec_dst = os.environ['REENCODE_CODEC'] 
-    else:
-        raise Exception('No reencode codec provided!')
+@app.delete('/delete_video')
+def delete_video(request : Delete_request):
+    database = Minio_handler(DATABASE_ENDPOINT, DATABASE_USR, DATABASE_PASSWD)
+    # try:
+    database.remove(DATABASE_BUCKET_NAME, request.video_name)
+    # except Exception as e:
+    #     raise HTTPException(status_code=500, detail=f'Erro ao deletar o vídeo:{str(e)}')
     
-    codec_bitrate = None
-    codec_crf_range = None
-    codec_speed = None
 
-    if 'BIT_RATE' in os.environ:
-        codec_bitrate = os.environ['BIT_RATE']
-    if 'CRF_RANGE' in os.environ:
-        codec_crf_range = os.environ['CRF_RANGE']
-    if 'SPEED' in os.environ:
-        codec_speed = os.environ['SPEED']
 
-    reencoder = None
-    if codec_dst == 'VP8':
-        reencoder = Vp8_reencoder(bit_rate=codec_bitrate, crf_range=int(codec_crf_range), speed=codec_speed)
-    elif codec_dst == 'VP9':
-        reencoder = Vp9_reencoder(bit_rate=codec_bitrate, crf_range=int(codec_crf_range), speed=codec_speed)    
-    elif codec_dst == 'AV1':
-        reencoder = Av1_reencoder(bit_rate=codec_bitrate, crf_range=int(codec_crf_range), speed=codec_speed)
-    else:
-        raise Exception(f'Invalid /"{codec_dst}/" Codec!')
-    
-    return reencoder
+
+
 
 if __name__ == '__main__':
     if 'OUTPUT_MOUNT_PATH' in os.environ:

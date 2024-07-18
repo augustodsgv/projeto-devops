@@ -20,6 +20,8 @@ class Minio_handler(Database_handler):
         
     
     def insert(self, bucket_name : str, file_path : str, object_name : str = None):
+        print(file_path)
+        print(os.listdir("/home/tmp/"))
         # Checking existence of the bucket
         if not self.client.bucket_exists(bucket_name):
             raise FileNotFoundError(f"No such bucket \"{bucket_name}\"")
@@ -29,9 +31,11 @@ class Minio_handler(Database_handler):
             raise FileNotFoundError(f'No such file \"{file_path}\"')
         
         if object_name == None:
-            object_name = file_path.split('/')[-1]      # If no object name was provided, using the file name
-
-        self.client.fput_object(bucket_name, file_path=file_path, object_name=object_name)
+            ...
+            # object_name = file_path.split('/')[-1]      # If no object name was provided, using the file name
+        result = self.client.fput_object(bucket_name, file_path=file_path, object_name=object_name)
+        print(result)
+  
 
     def get(self, bucket_name : str, object_name : str, download_path : str):
         if not self.client.bucket_exists(bucket_name):
