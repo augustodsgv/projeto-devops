@@ -6,6 +6,6 @@ RUN chmod +x /docker-entrypoint.d/40-environment-setup.sh
 
 # Frontend files
 COPY index.html /usr/share/nginx/html/index.html
-COPY script.js /usr/share/nginx/html/script.js
+COPY index.js /usr/share/nginx/html/index.js
 
 EXPOSE 80

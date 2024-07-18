@@ -3,14 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>URL Sender</title>
+    <title>FFMpeg Online</title>
 </head>
 <body>
+    <h1>FFMpeg Online</h1>
+    <h2>Arquivos disponívels</h2>
+    <table id="file-table" border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>URL</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Rows will be added here dynamically -->
+        </tbody>
+    </table>
     
-    <input type="text" id="video_url" name="Video url" placeholder="URL do video">
-    
-    <button type="button" id="reencode_button">Reencode video</button>
-    <p id="response_message"></p>
-    <script src="script.js" type="module"></script>
+    <div>
+        <p>Selecione um vídeo</p>
+        <input type="file" id="file-input">
+        <p id="upload_msg"></p>
+    </div>
+    <p></p>
+    <!-- <div class="btn"x>
+        <input type="text" id="video_url" name="Video url" placeholder="URL do video">
+        <button type="button" id="reencode_button">Reencode video</button>
+        <p id="reencode_msg"></p>
+    </div> -->
+    <div>
+        <input type="text" id="video_to_download" name="video_to_download" placeholder="Nome do vídeo para baixar">
+        <button type="button" id="download_button">Baixar vídeo</button>
+        <p id="download_msg"></p>
+    </div>
+
+    <script src="index.js" type="module"></script>
 </body>
 </html>

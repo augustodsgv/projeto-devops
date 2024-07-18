@@ -8,29 +8,41 @@ from src.utils.video_cutter import Video_cutter
 from src.database.minio_handler import Minio_handler
 
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Request, File, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Annotated
 import uvicorn
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 output_mount_path = ''
 
-class download_request(BaseModel):
+class Download_request(BaseModel):
     video_name : str
 
-class cut_request(BaseModel):
+class Cut_request(BaseModel):
     video_path : str
     video_begin : int
     video_end : int
     new_name : Optional[str] = None
 
-class reencode_request(BaseModel):
+class Reencode_request(BaseModel):
     video_source : str
+@app.post('/list')
+def list_videos():
+    database = Minio_handler("database:9000", "root", "rootroot")
+    return database.list("bucket-teste1")
 
 @app.post('/cut')
-def cut_video(request : cut_request):
+def cut_video(request : Cut_request):
     cutter = Video_cutter()
     video_path = request.video_path
     video_begin = request.video_begin
@@ -53,8 +65,8 @@ def cut_video(request : cut_request):
         if os.path.exists(video_name):      # Limpando arquivos temporários
             os.remove(video_name)
 
-@app.get('/download')
-def download_video(request : download_request):
+@app.post('/download')
+def download_video(request : Download_request):
     database : Minio_handler = Minio_handler("database:9000", "root", "rootroot")
     file_name = './'+request.video_name
     try:
@@ -64,15 +76,22 @@ def download_video(request : download_request):
                 yield from file
         return StreamingResponse(iterfile(), media_type="video/mp4")
     except Exception as e:
-        return {'Erro ao fazer download do vídeo o vídeo:':f'{str(e)}'}
+        raise HTTPException(status_code=500, detail=f'Erro ao fazer download do vídeo o vídeo:{str(e)}')
     # TODO: fix this. The finally block does now awaits for the yields functions to run
     # finally:
     #     if os.path.exists(file_name):
     #         os.remove(file_name)
 
+@app.post('/upload')
+def upload_video(file : UploadFile = File(...)):
+    file_path = f"./{file.filename}"
+    with open(file_path, "wb") as f:
+        f.write(file.file.read())
+    return {"filename" : file.filename}
+
 
 @app.post('/cut_file')
-def cut_video(request : cut_request):
+def cut_video(request : Cut_request):
     cutter = Video_cutter()
     video_path = request.video_path
     video_begin = request.video_begin
@@ -96,7 +115,7 @@ def cut_video(request : cut_request):
             os.remove(video_name)
 
 @app.post('/reencode')
-def reencode_video(request : reencode_request):
+def reencode_video(request : Reencode_request):
     reencoder = create_reencoder()
     downloader = Bucket_downloader()
     handler = Api_handler(reencoder=reencoder, downloader=downloader)
