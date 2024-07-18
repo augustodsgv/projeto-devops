@@ -1,6 +1,6 @@
-import { env } from './env.js'
-const BACKEND_URL = env.BACKEND_URL
-const BACKEND_PORT = env.BACKEND_PORT
+import env  from './env.js';
+const BACKEND_URL = "http://" + env.BACKEND_URL;
+const BACKEND_PORT = env.BACKEND_PORT;
 
 
 async function loadTableData() {

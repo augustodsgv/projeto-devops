@@ -16,8 +16,8 @@ file="
 const env = {
     BACKEND_URL: \"$BACKEND_URL\",
     BACKEND_PORT: $BACKEND_PORT
-}
+};
 
-module.exports = env"
+export default env;"
 
 echo "$file" >> /usr/share/nginx/html/env.js
