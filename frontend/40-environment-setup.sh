@@ -20,4 +20,4 @@ const env = {
 
 export default env;"
 
-echo "$file" >> /usr/share/nginx/html/env.js
+echo "$file" > /usr/share/nginx/html/env.js
