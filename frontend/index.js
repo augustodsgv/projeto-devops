@@ -6,10 +6,10 @@ const BACKEND_PORT = env.BACKEND_PORT;
 async function loadTableData() {
     const tableBody = document.getElementById('videoTable').getElementsByTagName('tbody')[0];
     tableBody.innerHTML = '';
-    const response = await fetch_video_list();
+    const video_list = await fetch_video_list();
     let videos
-    if (response.ok){
-        videos = await response.json()
+    if (video_list.ok){
+        videos = await video_list.json()
         console.log(videos)
     }
     videos.forEach(async video => {
@@ -35,8 +35,8 @@ async function loadTableData() {
         const deleteButton = document.createElement('button');
         deleteButton.textContent = 'Delete';
         deleteButton.onclick = async () => {
-            response = await delete_video(video);
-            if (response.ok){
+            const delete_response = await delete_video(video);
+            if (delete_response.ok){
                 // TODO: exibir mensagem de êxito
             }
         };
@@ -48,11 +48,11 @@ async function loadTableData() {
         const downloadButton = document.createElement('button');
         downloadButton.textContent = 'Download';
         downloadButton.addEventListener('click', async () => {
-            let response;
+            let download_response;
             try {
-                response = await download_video(video);
-                if (response.ok){
-                    const blob = await response.blob();
+                download_response = await download_video(video);
+                if (download_response.ok){
+                    const blob = await download_response.blob();
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.style.display = 'none';
@@ -62,7 +62,7 @@ async function loadTableData() {
                     a.click();
                     window.URL.revokeObjectURL(url);
                 }else{
-                    throw new Error(`Error: ${response.text()}`);
+                    throw new Error(`Error: ${download_response.text()}`);
                 }
             } catch (err) {
                 console.error(`error: ${err}`);
