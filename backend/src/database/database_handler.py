@@ -6,20 +6,18 @@ class Database_handler(ABC):
         pass
     
     @abstractmethod
-    def insert(self, bucket_name : str, file_path : str, object_name : str):
+    def insert(self, file_path : str, object_name : str, bucket_name : str):
         pass
     
     # TODO : insert já atualiza, mas é melhor ter uma função separada para isto
     # @abstractmethod
-    # def update(self, bucket_name : str, file_path : str, object_name : str):
+    # def update(self, file_path : str, object_name : str, bucket_name : str):
     #     pass
 
     @abstractmethod
-    def get(self, bucket_name : str, object_name : str, download_path : str):
+    def get(self, object_name : str, download_path : str, bucket_name : str):
         pass
 
     @abstractmethod
-    def remove(self, bucket_name : str, object_name : str):
+    def remove(self, object_name : str, bucket_name : str):
         pass
-
-# Banana anan
