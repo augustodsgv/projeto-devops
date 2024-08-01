@@ -1,6 +1,7 @@
 from src.database.database_handler import Database_handler
 from minio import Minio
 import os
+import logging
 
 class Minio_handler(Database_handler):
     def __init__(self, minio_url : str, minio_usr : str, minio_passwd : str, default_bucket : str | None = None):
@@ -9,10 +10,10 @@ class Minio_handler(Database_handler):
                             secret_key=minio_passwd,
                             secure=False        # "Insecure" to allow CORS 
                             )
-        
         self.default_bucket = default_bucket
         # Creating an default bucket, if it does not exist already
-        if default_bucket is not None and not self.client.bucket_exists(default_bucket):
+        if self.default_bucket is not None and not self.client.bucket_exists(default_bucket):
+            logging.info(f'Creating bucket {default_bucket}')
             self.client.make_bucket(self.default_bucket)
 
 
@@ -48,7 +49,6 @@ class Minio_handler(Database_handler):
             ...
             # object_name = file_path.split('/')[-1]      # If no object name was provided, using the file name
         result = self.client.fput_object(bucket_name, file_path=file_path, object_name=object_name)
-        print(result)
   
 
     def get(self, object_name : str, download_path : str, bucket_name : str | None = None)->None:

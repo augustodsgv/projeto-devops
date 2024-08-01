@@ -14,6 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
 import logging
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # endpoints
@@ -43,6 +44,7 @@ def list_videos():
 
 @app.post('/cut')
 async def cut_video(request : Cut_request):
+    logging.info(request.video_name)
     database = Minio_handler(minio_url=f"{DATABASE_ENDPOINT}:{DATABASE_PORT}",
                             minio_usr=DATABASE_USR,
                             minio_passwd=DATABASE_PASSWD,

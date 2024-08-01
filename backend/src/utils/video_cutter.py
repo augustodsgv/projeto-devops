@@ -28,10 +28,16 @@ class Video_cutter:
         # FFmpeg doesn´t handle names with white spaces
         if ' ' in input_path:
             input_path = f'"{input_path}"'
+            logging.info(f"FFmpeg can't handle file names with white spaces. Coverting input file name to {input_path}")
 
         # If output video has the same name as the input name path, overwrites the input video
         if output_path == None:
             output_path = input_path
+        else:
+            if ' ' in output_path:
+                # output_path = f'"{output_path}"'
+                logging.info(f"FFmpeg can't handle fine names with white spaces. Coverting output file name to {output_path}")
+
 
         # FFmpeg can´t read and write the same file at the same time. Thus, let's create a new file and rename it at the end
         original_output_path : str = output_path

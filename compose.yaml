@@ -1,6 +1,7 @@
 services:
   frontend:
-    image: ffmpeg-frontend:latest
+    # image: ffmpeg-frontend:latest
+    build: ./frontend
     ports:
     - "8080:80"
     environment:
@@ -10,7 +11,8 @@ services:
     - backend
   
   backend:
-    image: ffmpeg-backend:latest
+    # image: ffmpeg-backend:latest
+    build: ./backend
     environment:
       - OUTPUT_MOUNT_PATH=/data
       - REENCODE_CODEC=VP9
@@ -35,6 +37,7 @@ services:
       - database_credentials.env
     ports:
     - "9001:9001"
+    - "9000:9000"
     volumes:
     - ./db/data:/data
     command: server /data --console-address ":9001"
