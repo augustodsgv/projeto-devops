@@ -1,12 +1,15 @@
-from src.api.cut_handler import Cut_handler, Cut_request
-from src.api.download_handler import Download_handler, Download_request
-from src.utils.video_cutter import Video_cutter
 from src.database.minio_handler import Minio_handler
 
+from src.utils.video_cutter import Video_cutter
+from src.api.cut_handler import Cut_handler, Cut_request
+from src.api.download_handler import Download_handler, Download_request
+from src.api.upload_handler import Upload_handler
+from src.api.delete_handler import Delete_handler
+
+
 import os
-from fastapi import FastAPI, HTTPException, Request, File, UploadFile
+from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 
 import uvicorn
 
@@ -29,10 +32,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-output_mount_path = ''
-
-class Delete_request(BaseModel):
-    video_name : str
 
 @app.get('/list')
 def list_videos():
@@ -54,43 +53,30 @@ async def cut_video(request : Cut_request):
 
 @app.post('/download')
 def download_video(request : Download_request):
-    database : Minio_handler = Minio_handler(minio_url=f"{DATABASE_ENDPOINT}:{DATABASE_PORT}",
+    database = Minio_handler(minio_url=f"{DATABASE_ENDPOINT}:{DATABASE_PORT}",
                             minio_usr=DATABASE_USR,
                             minio_passwd=DATABASE_PASSWD,
                             default_bucket=DATABASE_BUCKET_NAME)
     download_handler = Download_handler(database=database)
     return download_handler.download(request=request)
-    
-    
 
 @app.post('/upload')
 def upload_video(file : UploadFile = File(...)):
-    if not os.path.exists("./tmp"):
-        os.mkdir("./tmp")
-    file_path = f"./tmp/{file.filename}"
-    with open(file_path, "wb") as f:
-        f.write(file.file.read())
-    database : Minio_handler = Minio_handler(minio_url=f"{DATABASE_ENDPOINT}:{DATABASE_PORT}",
-                            minio_usr=DATABASE_USR,
-                            minio_passwd=DATABASE_PASSWD,
-                            default_bucket=DATABASE_BUCKET_NAME)
-    database.insert(file_path, file.filename)
-    return {"filename" : file.filename}
-
+    database = Minio_handler(minio_url=f"{DATABASE_ENDPOINT}:{DATABASE_PORT}",
+                             minio_usr=DATABASE_USR,
+                             minio_passwd=DATABASE_PASSWD,
+                             default_bucket=DATABASE_BUCKET_NAME)
+    upload_handler = Upload_handler(database)
+    return upload_handler.upload(file)
+ 
 @app.delete('/delete_video')
-def delete_video(video_name : str = None):
-    if video_name == None:
-        raise HTTPException(status_code=422, detail=f'Missing video_name parameter')
-    database : Minio_handler = Minio_handler(minio_url=f"{DATABASE_ENDPOINT}:{DATABASE_PORT}",
-                            minio_usr=DATABASE_USR,
-                            minio_passwd=DATABASE_PASSWD,
-                            default_bucket=DATABASE_BUCKET_NAME)
-    try:
-        database.remove(video_name)
-        return {'Seu vídeo foi removido'}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f'Erro ao deletar o vídeo:{str(e)}')
-
+def delete_video(video_name : str):
+    database = Minio_handler(minio_url=f"{DATABASE_ENDPOINT}:{DATABASE_PORT}",
+                             minio_usr=DATABASE_USR,
+                             minio_passwd=DATABASE_PASSWD,
+                             default_bucket=DATABASE_BUCKET_NAME)
+    delete_handler = Delete_handler(database)
+    return delete_handler.delete(video_name)
 
 if __name__ == '__main__':
     if 'OUTPUT_MOUNT_PATH' in os.environ:

@@ -3,7 +3,7 @@ from minio import Minio
 import os
 
 class Minio_handler(Database_handler):
-    def __init__(self, minio_url : str, minio_usr : str, minio_passwd : str, default_bucket : str = None):
+    def __init__(self, minio_url : str, minio_usr : str, minio_passwd : str, default_bucket : str | None = None):
         self.client = Minio(minio_url,
                             access_key=minio_usr,
                             secret_key=minio_passwd,
@@ -16,7 +16,7 @@ class Minio_handler(Database_handler):
             self.client.make_bucket(self.default_bucket)
 
 
-    def list(self, bucket_name : str = None):
+    def list(self, bucket_name : str | None = None)->list:
         if bucket_name is None:
             if self.default_bucket is not None:
                 bucket_name = self.default_bucket
@@ -29,14 +29,13 @@ class Minio_handler(Database_handler):
         return [obj.object_name for obj in self.client.list_objects(bucket_name)]
         
     
-    def insert(self, file_path : str, object_name : str = None, bucket_name : str = None):
+    def insert(self, file_path : str, object_name : str  | None = None, bucket_name : str | None = None):
         if bucket_name is None:
             if self.default_bucket is not None:
                 bucket_name = self.default_bucket
             else:
                 raise TypeError("Either the provided or the default bucket names should be non None")
-        print(file_path)
-        print(os.listdir("/home/tmp/"))
+
         # Checking existence of the bucket
         if not self.client.bucket_exists(bucket_name):
             raise FileNotFoundError(f"No such bucket \"{bucket_name}\"")
@@ -52,7 +51,7 @@ class Minio_handler(Database_handler):
         print(result)
   
 
-    def get(self, object_name : str, download_path : str, bucket_name : str = None):
+    def get(self, object_name : str, download_path : str, bucket_name : str | None = None)->None:
         if bucket_name is None:
             if self.default_bucket is not None:
                 bucket_name = self.default_bucket
@@ -66,7 +65,7 @@ class Minio_handler(Database_handler):
         
         self.client.fget_object(bucket_name=bucket_name, object_name=object_name, file_path=download_path)
 
-    def remove(self, object_name : str, bucket_name : str = None):
+    def remove(self, object_name : str, bucket_name : str | None = None):
         if bucket_name is None:
             if self.default_bucket is not None:
                 bucket_name = self.default_bucket

@@ -2,11 +2,11 @@ from abc import ABC, abstractmethod
 
 class Database_handler(ABC):
     @abstractmethod
-    def list(self, bucket_name : str):
+    def list(self, bucket_name : str | None = None):
         pass
     
     @abstractmethod
-    def insert(self, file_path : str, object_name : str, bucket_name : str):
+    def insert(self, file_path : str, object_name : str, bucket_name : str | None = None):
         pass
     
     # TODO : insert já atualiza, mas é melhor ter uma função separada para isto
@@ -15,9 +15,9 @@ class Database_handler(ABC):
     #     pass
 
     @abstractmethod
-    def get(self, object_name : str, download_path : str, bucket_name : str):
+    def get(self, object_name : str, download_path : str, bucket_name : str | None = None):
         pass
 
     @abstractmethod
-    def remove(self, object_name : str, bucket_name : str):
+    def remove(self, object_name : str, bucket_name : str | None = None):
         pass

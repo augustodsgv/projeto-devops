@@ -23,15 +23,15 @@ class Download_handler:
     def __init__(self, database : Database_handler):
         self.database = database
 
-    def download(self, request : Download_request):
+    def download(self, request : Download_request)->StreamingResponse:
         file_name = TEMP_FILES_PATH + request.video_name
         
- # Downloading the video from database
         if not request.video_name in self.database.list():
             raise HTTPException(status_code=404, detail=f'Video {request.video_name} not found!')
+        # Downloading the video from database
+        self.database.get(request.video_name, file_name)
 
         try:
-            self.database.get(request.video_name, file_name)
             def iterfile():
                 with open(file_name, 'rb') as file:
                     yield from file
