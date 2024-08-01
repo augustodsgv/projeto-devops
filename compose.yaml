@@ -1,16 +1,16 @@
 services:
   frontend:
-    build: ./frontend
+    image: ffmpeg-frontend:latest
     ports:
     - "8080:80"
     environment:
-    - BACKEND_URL=localhost
+    - BACKEND_URL=192.168.0.6
     - BACKEND_PORT=7000
     depends_on:
     - backend
   
   backend:
-    build: ./backend
+    image: ffmpeg-backend:latest
     environment:
       - OUTPUT_MOUNT_PATH=/data
       - REENCODE_CODEC=VP9
