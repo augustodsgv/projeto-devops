@@ -2,24 +2,18 @@ services:
   frontend:
     # image: ffmpeg-frontend:latest
     build: ./frontend
+    env_file:
+      - variables.env
     ports:
     - "8080:80"
-    environment:
-    - BACKEND_URL=192.168.0.6
-    - BACKEND_PORT=7000
     depends_on:
     - backend
   
   backend:
     # image: ffmpeg-backend:latest
     build: ./backend
-    environment:
-      - OUTPUT_MOUNT_PATH=/data
-      - REENCODE_CODEC=VP9
-      - DATABASE_ENDPOINT=database
-      - DATABASE_PORT=9000
     env_file:       # Getting database user and passwd
-      - database_credentials.env
+      - variables.env
     ports:
     - "7000:7000"
     volumes:
@@ -30,7 +24,7 @@ services:
   database:
     image: quay.io/minio/minio
     env_file:
-      - database_credentials.env
+      - variables.env
     ports:
     - "9001:9001"
     - "9000:9000"
