@@ -1,43 +1,34 @@
 services:
   frontend:
-    # image: ffmpeg-frontend:latest
     build: ./frontend
     ports:
     - "8080:80"
-    environment:
-    - BACKEND_URL=192.168.0.6
-    - BACKEND_PORT=7000
+    env_file:
+    - variables.env
     depends_on:
     - backend
   
   backend:
-    # image: ffmpeg-backend:latest
     build: ./backend
-    environment:
-      - OUTPUT_MOUNT_PATH=/data
-      - REENCODE_CODEC=VP9
-      - DATABASE_ENDPOINT=database
-      - DATABASE_PORT=9000
-      # - DATABASE_USR=root
-      # - DATABASE_PASSWD=rootroot
-      # - DATABASE_BUCKET_NAME=bucket_ffmpeg
-      - DATABASE_BUCKET_NAME=bucket-teste1
     env_file:       # Getting database user and passwd
-      - database_credentials.env
+      - variables.env
     ports:
     - "7000:7000"
-    volumes:
-    - ./backend/data:/data
     depends_on:
       - database
     
   database:
     image: quay.io/minio/minio
     env_file:
-      - database_credentials.env
+      - variables.env
     ports:
     - "9001:9001"
     - "9000:9000"
     volumes:
-    - ./db/data:/data
+    - db-data:/data
+
     command: server /data --console-address ":9001"
+  
+
+volumes:
+  db-data:

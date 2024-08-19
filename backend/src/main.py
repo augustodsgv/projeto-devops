@@ -22,7 +22,6 @@ DATABASE_ENDPOINT = os.environ['DATABASE_ENDPOINT']
 DATABASE_PORT = os.environ['DATABASE_PORT']
 DATABASE_USR = os.environ['DATABASE_USR']
 DATABASE_PASSWD = os.environ['DATABASE_PASSWD']
-DATABASE_PASSWD = os.environ['DATABASE_PASSWD']
 DATABASE_BUCKET_NAME = os.environ['DATABASE_BUCKET_NAME']
 
 app = FastAPI()
@@ -81,12 +80,4 @@ def delete_video(video_name : str):
     return delete_handler.delete(video_name)
 
 if __name__ == '__main__':
-    if 'OUTPUT_MOUNT_PATH' in os.environ:
-        output_mount_path = os.environ['OUTPUT_MOUNT_PATH']
-    else:
-        raise Exception('No output mount point indicated!')
-    
-    if 'REENCODE_CODEC' not in os.environ:
-        raise Exception('No reencode codec provided!')
-    
     uvicorn.run(app, host='0.0.0.0', port=7000)
