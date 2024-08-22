@@ -3,6 +3,7 @@ FROM nginx:latest
 # Builds the environment files from js
 COPY 40-environment-setup.sh /docker-entrypoint.d
 RUN chmod +x /docker-entrypoint.d/40-environment-setup.sh
+RUN apt update && apt upgrade -y && apt install dnsutils -y
 
 # Frontend files
 COPY index.html /usr/share/nginx/html/index.html

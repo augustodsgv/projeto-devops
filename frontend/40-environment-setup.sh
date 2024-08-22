@@ -12,9 +12,10 @@ if [ -z "$BACKEND_PORT" ]; then
 fi
 
 # File to write to env file
+BACKEND_IP=$(dig +short $BACKEND_URL)
 file="
 const env = {
-    BACKEND_URL: \"$BACKEND_URL\",
+    BACKEND_URL: \"$BACKEND_IP\",
     BACKEND_PORT: $BACKEND_PORT
 };
 

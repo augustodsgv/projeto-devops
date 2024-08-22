@@ -6,10 +6,6 @@ Gabrielly Castilho Guimarães - 805757
 ## Como rodar
 1. Tenha o Docker e o Docker Compose instalados
 2. Preencha o arquivo `variables.env` com as variáveis de ambiente corretas. 
-> Note que o IP usado pelo frontend é o IP que o computador do cliente irá usar, portanto use um IP acessível de fora do container.
-
-> Note também que, devido à implementação do MinIO, não é possível ajustar o suporte a CORS. Portanto, use um IP real (como o IP do computador na rede local) ou use o nome do container na rede do docker (projeto-devops-database-1)
-
 3. Suba os serviços usando o compose
 ```sh
 docker compose up
