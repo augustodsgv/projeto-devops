@@ -5,7 +5,7 @@ services:
     env_file:
       - variables.env
     ports:
-    - "8080:80"
+    - "80:80"
     depends_on:
     - backend
   
@@ -14,8 +14,8 @@ services:
     build: ./backend
     env_file:       # Getting database user and passwd
       - variables.env
-    ports:
-    - "7000:7000"
+    # ports:
+    # - "7000:7000"
     volumes:
     - ./backend/data:/data
     depends_on:
@@ -25,9 +25,9 @@ services:
     image: quay.io/minio/minio
     env_file:
       - variables.env
-    ports:
-    - "9001:9001"
-    - "9000:9000"
+    # ports:
+    # - "9001:9001"
+    # - "9000:9000"
     volumes:
     - ./db/data:/data
     command: server /data --console-address ":9001"

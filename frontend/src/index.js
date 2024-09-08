@@ -1,8 +1,3 @@
-import env  from './env.js';
-const BACKEND_URL = "http://" + env.BACKEND_URL;
-const BACKEND_PORT = env.BACKEND_PORT;
-
-
 async function loadTableData() {
     const tableBody = document.getElementById('videoTable').getElementsByTagName('tbody')[0];
     tableBody.innerHTML = '';
@@ -75,7 +70,7 @@ async function loadTableData() {
 }
 
 async function fetch_video_list(){
-    const response = await fetch(BACKEND_URL+':'+BACKEND_PORT+"/list", {
+    const response = await fetch("/list", {
         method: 'GET',
     });
     return response
@@ -90,7 +85,7 @@ fileInput.addEventListener('change', () => {
     const selectedFile = fileInput.files[0];
     const formData = new FormData();
     formData.append('file', selectedFile);
-    fetch(BACKEND_URL+':'+BACKEND_PORT+'/upload',{
+    fetch('/upload',{
         method: 'POST',
         body: formData
     })
@@ -114,7 +109,7 @@ async function display_upload_response(response){
 }
 
 async function download_video(video_name){
-    const response = await fetch(BACKEND_URL+':'+BACKEND_PORT+'/download', {
+    const response = await fetch('/download', {
         method: 'post',
         headers: {
             'Content-Type': 'application/json'
@@ -128,7 +123,7 @@ async function download_video(video_name){
 
 async function delete_video(video_name){
     const response = await fetch(
-        BACKEND_URL+':'+BACKEND_PORT+'/delete_video?video_name='+video_name, {
+        '/delete_video?video_name='+video_name, {
         method: 'delete',
     });
     return response;

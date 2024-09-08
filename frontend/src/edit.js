@@ -1,7 +1,3 @@
-import env  from './env.js';
-const BACKEND_URL = "http://" + env.BACKEND_URL;
-const BACKEND_PORT = env.BACKEND_PORT;
-
 async function set_title(){
     let title_name = document.getElementById('titulo-pagina');
     const nome_arquivo = await get_nome_arquivo();
@@ -39,7 +35,7 @@ async function processar_video(video_name){
             video_name:video_name,
             video_start:video_start,
             video_end:video_end}))
-        response = await fetch(BACKEND_URL+":"+BACKEND_PORT+"/cut", {
+        response = await fetch("/cut", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
