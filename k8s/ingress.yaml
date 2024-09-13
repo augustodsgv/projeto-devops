@@ -1,0 +1,69 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ffmpeg
+  annotations:
+  #   nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/proxy-body-size: "400m"
+
+spec:
+  ingressClassName: nginx
+  rules:
+  # - host: ffmpeg.k8s.local 
+  - http:
+      paths:
+      - path: /
+        backend:
+          service:
+            name: frontend
+            port:
+              number: 80
+        pathType: Prefix
+
+      - path: /docs
+        backend:
+          service:
+            name: backend
+            port:
+              number: 7000
+        pathType: Exact
+
+      - path: /list
+        backend:
+          service:
+            name: backend
+            port:
+              number: 7000
+        pathType: Exact
+
+      - path: /upload
+        backend:
+          service:
+            name: backend
+            port:
+              number: 7000
+        pathType: Exact
+      
+      - path: /download
+        backend:
+          service:
+            name: backend
+            port:
+              number: 7000
+        pathType: Exact
+
+      - path: /delete_video
+        backend:
+          service:
+            name: backend
+            port:
+              number: 7000
+        pathType: Exact
+
+      - path: /cut
+        backend:
+          service:
+            name: backend
+            port:
+              number: 7000
+        pathType: Exact

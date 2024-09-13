@@ -47,5 +47,38 @@ pudesse receber variáveis de ambiente passadas na execução do docker.
 
 No banco de dados, foi usada uma imagem oficial do minion, que pode ser usada "out of the box".
 
+## Kubernetes
+Para rodar o projeto, primeiro certifique-se que o serviço de kubernetes que você está usando suporta o IngressController do kubernetes. Neste respositório existem dois scripts que habilitam o 
+ingress nginx nos clusteres self-hosted, um para Minikube e outro para o o kind. Para rodá-los basta rodar:
+```sh
+# Kind
+./kind-config.sh
+
+# Minikube
+./minikube-config.sh
+```
+
+Com o ingress configurado, basta fazer deploy das aplicações, seus serviços e o ingress controller:
+```sh
+# Frontend
+kubectl apply -f k8s/frontend
+
+# Backend
+kubectl apply -f k8s/backend
+
+# Database
+kubectl apply -f k8s/db
+
+# Ingress
+kubectl apply -f k8s/ingress.yaml
+```
+
+Após isto, será possível ver o IP que o ingress está rodando, o qual nós poderemos usar para acessar a aplicação
+```sh
+kubectl get ing
+```
+
+Com isso feito, basta acessar o ip no browser
+
 ## Saiba mais
 Saiba mais em nosso [arquivo detalhado](./pratica_devops.pdf)

@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: augustodsgv/ffmpeg-backend
+          imagePullPolicy: Always
+          env:
+          - name: DATABASE_ENDPOINT
+            value: minio
+          - name: DATABASE_PORT
+            value: "9000"
+          - name: DATABASE_USR
+            value: "minio"
+          - name: DATABASE_PASSWD
+            value: "miniominio"
+          - name: DATABASE_BUCKET_NAME
+            value: "bucket-teste"
