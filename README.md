@@ -60,7 +60,15 @@ ingress nginx nos clusteres self-hosted, um para Minikube e outro para o o kind.
 
 Com o ingress configurado, altere o valor das secrets do banco de dados nos arquivos que estão em `k8s/backend/secrets.yaml` e `k8s/db/secrets.yaml`
 
-Com o usuário e senha do DB configurados, basta fazer deploy das aplicações, seus serviços e o ingress controller:
+Com o usuário e senha do DB configurados, basta fazer deploy das aplicações, seus serviços e o ingress controller.
+Você pode usar o script que faz isso de forma automática:
+
+```sh
+./deploy_kubernetes.sh
+```
+
+Mas caso deseje fazer manualmente:
+
 ```sh
 # Frontend
 kubectl apply -f k8s/frontend
