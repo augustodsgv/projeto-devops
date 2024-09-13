@@ -17,12 +17,32 @@ spec:
           imagePullPolicy: Always
           env:
           - name: DATABASE_ENDPOINT
-            value: minio
+            valueFrom:
+              configMapKeyRef:
+                name: backend-configmap
+                key: database-endpoint
+            # value: minio
           - name: DATABASE_PORT
-            value: "9000"
-          - name: DATABASE_USR
-            value: "minio"
-          - name: DATABASE_PASSWD
-            value: "miniominio"
+            valueFrom:
+              configMapKeyRef:
+                name: backend-configmap
+                key: database-port
+            # value: "9000"
           - name: DATABASE_BUCKET_NAME
-            value: "bucket-teste"
+            valueFrom:
+              configMapKeyRef:
+                name: backend-configmap
+                key: database-bucket-name
+            # value: "bucket-teste"
+          - name: DATABASE_USR
+            valueFrom:
+              secretKeyRef:
+                name: backend-secrets
+                key: database-user
+            # value: "minio"
+          - name: DATABASE_PASSWD
+            valueFrom:
+              secretKeyRef:
+                name: backend-secrets
+                key: database-passwd
+            # value: "miniominio"

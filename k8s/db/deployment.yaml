@@ -24,22 +24,17 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
           - containerPort: 9000
-          - containerPort: 9001
         env:
           - name: MINIO_ROOT_USER
-            value: "minio"
+            valueFrom:
+              secretKeyRef:
+                name: db-secrets
+                key: database-user
           - name: MINIO_ROOT_PASSWORD
-            value: "miniominio"
-          # - name: MINIO_ROOT_USER
-          #   valueFrom:
-          #     secretKeyRef:
-          #       name: ffmpeg-db-secret
-          #       key: username
-          # - name: MINIO_ROOT_PASSWORD
-          #   valueFrom:
-          #     secretKeyRef:
-          #       name: ffmpeg-db-secret
-          #       key: password
+            valueFrom:
+              secretKeyRef:
+                name: db-secrets
+                key: database-passwd
 
         volumeMounts:
         - name: data
