@@ -1,7 +1,6 @@
 services:
   frontend:
-    # image: ffmpeg-frontend:latest
-    build: ./frontend
+    build: ./frontend_docker
     env_file:
       - variables.env
     ports:
@@ -10,12 +9,11 @@ services:
     - backend
   
   backend:
-    # image: ffmpeg-backend:latest
     build: ./backend
-    env_file:       # Getting database user and passwd
+    env_file:
       - variables.env
-    # ports:
-    # - "7000:7000"
+    ports:
+    - "7000:7000"
     volumes:
     - ./backend/data:/data
     depends_on:
@@ -25,9 +23,8 @@ services:
     image: quay.io/minio/minio
     env_file:
       - variables.env
-    # ports:
-    # - "9001:9001"
-    # - "9000:9000"
+    ports:
+    - "9001:9001"
     volumes:
     - ./db/data:/data
     command: server /data --console-address ":9001"

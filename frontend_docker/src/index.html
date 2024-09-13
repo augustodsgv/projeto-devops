@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FFMpeg Online</title>
+    <style>
+        table {
+            width: 80%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 5px;
+            text-align: left;
+        }
+        button {
+            padding: 5px;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>FFMpeg Online</h1>
+    <hr></hr>
+    <table id="videoTable">
+        <thead>
+            <tr>
+                <th>File Name</th>
+                <th>Edit</th>
+                <th>Delete</th>
+                <th>Download</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Rows will be added dynamically here -->
+        </tbody>
+    </table>
+
+    <p>Upload de vídeo</p>
+    <input type="file" id="file-input"/>
+    <p id="upload_msg"></p>
+
+    <script src="index.js" type="module"></script>
+</body>
+</html>
